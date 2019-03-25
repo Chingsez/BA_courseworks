@@ -1,0 +1,11 @@
+"key_id	",ssn,type,statues,start_date,end_date
+"1	",579052106,annual,inactive,2016/10/1,2017/10/1
+"2	",577228101,semiannual,inactive,2017/4/2,2017/10/2
+"3	",577428570,monthly,inactive,2017/6/3,2017/7/3
+"4	",579842899,semiannual,inactive,2017/6/4,2017/12/4
+"5	",579721097,semiannual,active,2018/9/5,2019/3/5
+"6	",577928610,monthly,active,2018/10/6,2018/11/6
+"7	",577039958,annual,active,2018/10/7,2019/10/7
+"8	",578926274,monthly,active,2018/10/7,2018/11/7
+"9	",578788989,semiannual,active,2018/10/9,2019/4/9
+"10	",577371597,annual,active,2017/10/10,2018/10/10
