@@ -1,0 +1,124 @@
+---
+title: "A04_G28512359"
+author: "JINGSI WU"
+date: "9/21/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(car)
+library(MASS)
+```
+
+##  Part A
+
+
+First, read the dataset file.
+```{r dataset}
+mydf <- read.csv("SalesPerformance.csv")
+```
+
+
+
+Then build a multiple regression model and check the summary of the model
+```{r RegMod}
+RegMod <- lm(Profit~Area+Popn+Outlets+Commis, data = mydf)
+summary(RegMod)
+```
+As the summary shows, the model's Adjusted R-squared is 0.65, which is not bad for most real world data. To anakyze the effect of each variables, we need to calculate the standardized regression coefficient.
+
+
+
+```{r standardized regression coefficient}
+mydf_stan <- as.data.frame(scale(mydf))
+stanfit <- lm(Profit~Area+Popn+Outlets+Commis, data = mydf_stan)
+coef(stanfit)
+```
+As the result shows above, AREA has the largest effect on PROFIT, also its effect is negative. Then COMMIS also have large effct, but it's positive. All the variables do have some kind of effect on PROFIT.
+
+
+
+Now build a new model to check whether there is a combination effect of COMMIS and OUTLETS
+```{r RegMod2}
+RegMod2 <- lm(Profit~Area+Popn+Outlets+Commis+Outlets*Commis, data = mydf)
+summary(RegMod2)
+```
+From the second model we can see that by adding a new variable OUTLETS*COMMIS, the p-value of this variable does not reach the significant level we set (95%), so there is no cobination effect between this two variables.
+
+
+
+Now let's check whether we should use PROFIT or PROFIT divided by OUTLETS as the dependent variable.
+```{r RegMod3}
+RegMod3 <- lm(Profit/Outlets~ Area + Popn + Commis, data = mydf)
+summary(RegMod3)
+```
+The Adjusted R-squared become smaller, it is not a good model, so we'll keep use PROFIT as the dependent variable.
+
+
+
+## Part B
+
+
+
+To omit the variables, we use strpwise method.
+```{r stepwise}
+step <- stepAIC(RegMod, direction = "both")
+```
+After stepwise, OUTLETS has been removed from the model, since POPN also don't reach our significant level, and by removing it the AIC will not increase a lot, so we'll also omit POPN. Now let's see build a new model with this result and summarize it.
+
+
+
+```{r RegMod4}
+RegMod4 <- lm(Profit~Area+Commis, data = mydf)
+summary(RegMod4)
+```
+Now the model looks better, altough the adjusted R-squared decrease a tiny little bit, but the significant level of the rest variables have increased. Also, the p-value of F-statistic become smaller. 
+
+
+For more imformation to get a precise model, we can plot it and see the pictures.
+```{r plot}
+plot(RegMod4)
+```
+
+The picture shows that district 27 and 47 could be out liers, so we can build a model without this two values.
+
+
+
+```{r}
+mydf <- mydf[-(27), -(47)]
+RegMod4 <- lm(Profit~Area+Commis, data = mydf)
+summary(RegMod4)
+vif(RegMod4)
+```
+Great! The adjusted R-squared become much more higher, and there is no multicollinearity in the model, our model is now welly prepared.
+
+
+
+## Part C
+From the result above we can see that when the district area become larger, the profit of representative will decrease, because they have to spend more time on travlling. Also other factors do have effect on the profit, but their effect are not as much as AREA and COMMIS. 
+
+
+In the model, we discover that OUTLETS and COMMIS don't have any combination effect, they are two independent variables to the PROFIT. 
+
+
+
+Useing PROFIT devided by OUTLETS as dependent variable is not a good choice, it will decrease the accuracy of the model.
+
+
+
+## Part D
+
+
+
+1.By analyzing the data, we found both AREA, POPN, OUTLETS and COMMIS have effect on PROFIT, but not all can well explained by this model, so after analysis, we decided to moit POPN and OUTLETS, just using AREA and COMMIS to predict the PROFIT. When the area of the district become larger, the performance of representatives will decrease because they have to spend more time on traveling. Representatives who pay by a full commission usually make higher profit, because that's how they can get enough salary.
+
+
+2.Also, we detect that there is no relationship between OUTLETS and COMMIS, they will 
+not affect each other.
+
+
+3.PROFIT itself would be better as a measuring factor, because we found PROFIT devidied by OUTLETS will cause a much larger standard deviation.
+
+
+4.Some data in the dataset are not reasonable, in order to increase the accruacy, we delete some of the data and gain the final model. This model can be used to predict the performance of each representatives and help them to improve it.

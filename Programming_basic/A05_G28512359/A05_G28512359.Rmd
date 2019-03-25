@@ -1,0 +1,66 @@
+---
+title: "A05_G28512359"
+author: "JINGSI WU"
+date: "9/27/2018"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(shiny)
+```
+
+First we need to define UI
+```{r ui}
+ui <- fluidPage(
+  
+  # Application title
+  titlePanel("Read a csv file"),
+  
+  # Sidebar with a slider input for rows and columns we want to show 
+  sidebarLayout(
+    sidebarPanel(
+      #Define the input file must be csv
+     fileInput('file1', 'Choose csv file',
+                  accept = c(
+                    "text/csv",
+                    "text/comma-separated-values",
+                    "text/plain")
+                  ),  
+      tags$hr(), 
+      #Define 2 sliders, one for selecting rows and another for columns
+      sliderInput("row", "Number of rows to show", 1, 2500, value = c(30, 80)),
+      sliderInput("column", "Number of columns to show", 1, 20, value = c(1, 10))
+    ),
+    
+    # Show the rows and columns we choose in the csv file
+    mainPanel(
+      tableOutput("dataset")
+    )
+  )
+)
+```
+
+In order to outpout what we want smoothly, we must define the function in server
+```{r server}
+# Define server logic required to read dataset and select rows and columns
+server <- function(input, output) {
+   output$dataset <- renderTable({
+     #When no file selected, defined as NULL
+   inFile <- input$file1
+   if (is.null(inFile))
+     return(NULL)
+   #Read csv file and select given columns and rows
+   data_set <- read.csv(inFile$datapath)
+   newdata <- data_set[c(input$row[1]:input$row[2]), c(input$column[1]:input$column[2])]
+ }
+   
+ )
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+In the given dataset, there are over 2400 rows and 10 columns, so we choose 2500 as the maximum rows and 20 as the maximum column so the given dataset can be fully displayed.

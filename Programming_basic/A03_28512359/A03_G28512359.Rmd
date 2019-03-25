@@ -1,0 +1,112 @@
+---
+title: "A03_G28512359"
+author: "JINGSI WU"
+date: "9/16/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+To start solving the questions, we need to load the dataset and do some data prepocessing.
+
+First we read our dataset.
+```{r kickfootball}
+mydf <- read.csv("kicksfootball.csv")
+summary(mydf)
+```
+
+As we can see in the summary, there are upper and lower "y" in the dataset, both "y" represent Melvin has reached his goal.
+So when we change catagorical data to dummy variables, "y" also need to be difined.
+```{r data prepocessing}
+mydf$prac_mat_bin <- ifelse(mydf$practiceormatch == "P", 1, 0)
+mydf$gbin <- ifelse(mydf$goal == "Y"|mydf$goal == "y", 1, 0) 
+
+```
+
+Data preprocessing has done! Now let's start solving the problems.
+
+## Part A
+
+First we need to check some key information of the dataset.
+```{r kickfoodball}
+str(mydf)
+
+```
+
+As you can see, there are 952 observations in the dataset. Now let's count how many times did Melvin succeed. 
+```{r Melvin succeed}
+summary(mydf)
+```
+
+The probability that Melvin is going to reach his goal is
+```{r goal}
+goalreach <- (742+17)/952
+print(goalreach)
+```
+
+
+## Part B
+
+To build the practice and match model, we need to seperate the data first.
+```{r seperate data}
+gbin_prac <- subset(mydf, mydf$prac_mat_bin == 1)
+gbin_mat <- subset(mydf, mydf$prac_mat_bin == 0)
+```
+
+Then we can fit the data into the logistic regression model and see the result.
+```{r logistic}
+goal_prac.mod <- glm(gbin ~ yards, 
+               data = gbin_prac,
+               family = binomial)
+
+goal_mat.mod <- glm(gbin ~ yards, 
+                     data = gbin_mat,
+                     family = binomial)
+summary(goal_prac.mod)
+summary(goal_mat.mod)
+```
+
+The regression model seems no problem, so now we can strat to predict Melvin's performance.
+```{r}
+pred <- c(20, 40, 60)
+newdata  = data.frame(yards = pred)
+predict(goal_prac.mod, newdata, type = "response")
+predict(goal_mat.mod, newdata, type = "response")
+```
+
+The probability of Melvin scoring a goal when he kicks from 20, 40 and 60 yards in practice is 0.94, 0.76, 0.39.
+Theprobability of Melvin scoring a goal when he kicks from 20, 40 and 60 yards in match is 0.97, 0.76, 0.22.
+The probability is different.
+
+## Part C
+
+Before we start to plot, we need to reorganize the data and create a new dataset. I'm going to predict the performance of Melvin from 15 yards to 75 yards. Also, for each value we must create a corresponding lable.
+```{r ggplot prepare}
+yard_plot <- data.frame(seq(15,75,1)) 
+colnames(yard_plot) <- "yards"
+prac_label <- data.frame(rep("Practice", 61))
+prac_plot <- data.frame(yard_plot, predict(goal_prac.mod, yard_plot, type = "response"), prac_label)
+mat_label <- data.frame(rep("Match", 61))
+mat_plot <- data.frame(yard_plot, predict(goal_mat.mod, yard_plot, type = "response"), mat_label)
+
+```
+
+Then we give the dataset above same column names so that we can combine them together
+```{r combine }
+colnames(mat_plot) <- c("yards", "probability", "labels")
+colnames(prac_plot) <- c("yards", "probability", "labels")
+plotset <- rbind(prac_plot, mat_plot)
+```
+
+Finally, use ggplot2 to get the picture
+```{r plot data}
+ggplot(plotset,aes(x = yards, y = probability, col = labels ))+ 
+  geom_line()+
+  xlim(c(10,75))+
+  ylim(c(0,1))+
+  labs(x='Yards',y='Probability of Melvin scoring', title = "Probability of Malvin score in match&practice" )
+```
+
