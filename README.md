@@ -11,3 +11,6 @@ Use command line and SQL to clean and analyze data, also did some basic visualiz
 - [Programming](Programming_basic)
 
 Using R and Python to manipulate and analyze data, also did some web scraping, sentiment analysis, map plot exercises.
+- [Decision and Risk](Decision_and_Risk)
+
+Build risk evaluation models, find best alternatives and make data-driven decisions, mainly using Excel.
